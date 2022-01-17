@@ -1,7 +1,9 @@
 module Transactions where
 
-import Prelude hiding (lookup)
-import Tables
+import           Control.Monad (foldM)
+-- import           Data.Map      (Map, alter, filter, null)
+import           Prelude       hiding (filter, lookup, null)
+import           Tables
 
 -- START HERE AFTER Tables.hs
 
@@ -35,7 +37,7 @@ transaction2 =
   Transaction
     { trAmount = 7
     , trFrom   = "Lars"
-    , trTo     = "Philipp"
+    , trTo     = "Alejandro"
     }
 
 -- Task Transactions-1.
@@ -48,7 +50,7 @@ transaction2 =
 -- Transaction {trAmount = -10, trFrom = "Lars", trTo = "Andres"}
 --
 flipTransaction :: Transaction -> Transaction
-flipTransaction = error "TODO: implement flipTransaction"
+flipTransaction Transaction { trAmount = amount, trFrom = from, trTo = to } = Transaction { trAmount = -amount, trFrom = to, trTo = from }
 
 -- Task Transactions-2.
 --
@@ -56,7 +58,11 @@ flipTransaction = error "TODO: implement flipTransaction"
 -- if the transaction amount is negative.
 
 normalizeTransaction :: Transaction -> Transaction
-normalizeTransaction = error "TODO: impement normalizeTransaction"
+normalizeTransaction tr
+  | (amount < 0) = tr { trAmount = -amount }
+  | otherwise = tr
+    where
+      amount = trAmount tr
 
 -- Task Transactions-3.
 --
@@ -65,6 +71,7 @@ normalizeTransaction = error "TODO: impement normalizeTransaction"
 -- the Tables tasks.
 
 type Accounts = Table Account Amount
+-- type Accounts = Map Account Amount
 
 -- |
 -- >>> let a = processTransaction transaction1 $ insert "Andres" 30 empty
@@ -81,7 +88,15 @@ type Accounts = Table Account Amount
 -- Just 7
 --
 processTransaction :: Transaction -> Accounts -> Accounts
-processTransaction = error "TODO: implement processTransaction"
+processTransaction tr = alter alterTo (trTo tr) . alter alterFrom (trFrom tr)
+  where
+    -- alterFrom :: Maybe Amount -> Maybe Amount
+    alterFrom (Nothing) = Just (- (trAmount tr))
+    alterFrom (Just v)  = Just (v - (trAmount tr))
+    -- alterFrom = (<$>) (\x -> x - (trAmount tr))
+    -- alterTo :: Maybe Amount -> Maybe Amount
+    alterTo (Nothing) = Just (trAmount tr)
+    alterTo (Just v)  = Just (v + (trAmount tr))
 
 -- Task Transactions-4.
 --
@@ -89,6 +104,9 @@ processTransaction = error "TODO: implement processTransaction"
 -- 'Tables' constructor if you have hidden the 'Tables'
 -- constructor from the export list as requested in the
 -- Tables tasks.
+
+-- pmTables :: Accounts -> Accounts
+-- pmTables (Table accounts) = (Table accounts)
 
 -- Task Transactions-5.
 --
@@ -104,7 +122,7 @@ processTransaction = error "TODO: implement processTransaction"
 -- Just 7
 --
 processTransactions :: [Transaction] -> Accounts -> Accounts
-processTransactions = error "TODO: implement processTransactions"
+processTransactions trs accounts = foldl (flip processTransaction) accounts trs
 
 -- Task Transactions-6.
 --
@@ -121,8 +139,15 @@ processTransactions = error "TODO: implement processTransactions"
 -- >>> processTransaction' transaction1 empty
 -- Nothing
 --
+
 processTransaction' :: Transaction -> Accounts -> Maybe Accounts
-processTransaction' = error "TODO: implement processTransaction'"
+processTransaction' tr accounts =
+  let
+    processedTr = processTransaction tr accounts
+  in
+    if validBalances processedTr then (Just processedTr) else Nothing
+  where
+    validBalances accounts' = null $ filter (< 0) accounts'
 
 -- Task Transactions-7.
 --
@@ -142,7 +167,7 @@ processTransaction' = error "TODO: implement processTransaction'"
 -- Nothing
 --
 processTransactions' :: [Transaction] -> Accounts -> Maybe Accounts
-processTransactions' = error "TODO: implement processTransactions'"
+processTransactions' trs accounts = foldM (flip processTransaction') accounts trs
 
 -- Task Transactions-8.
 --

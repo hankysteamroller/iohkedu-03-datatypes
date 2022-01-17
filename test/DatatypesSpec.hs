@@ -4,8 +4,8 @@ module DatatypesSpec
     ( spec
     ) where
 
-import           Prelude hiding (or, reverse)
-import qualified Prelude as P
+import           Prelude         hiding (or, reverse)
+import qualified Prelude         as P
 import           Test.Hspec
 import           Test.QuickCheck
 

@@ -2,8 +2,8 @@
 module Datatypes where
 
 -- We hide functions we are going to redefine.
-import Prelude hiding ((++), or, reverse, filter)
-import Control.Applicative ((<|>), liftA2)
+import           Control.Applicative (liftA2, (<|>))
+import           Prelude             hiding (filter, or, reverse, (++))
 
 -- Task Datatypes-1.
 --
@@ -26,7 +26,9 @@ import Control.Applicative ((<|>), liftA2)
 -- False
 --
 implies :: Bool -> Bool -> Bool
-implies = error "TODO: define implies"
+implies False _   = True
+implies True True = True
+implies _ _       = False
 
 -- Task Datatypes-2.
 --
@@ -34,7 +36,9 @@ implies = error "TODO: define implies"
 -- of 'not' and '||', both of which are predefined.
 
 implies' :: Bool -> Bool -> Bool
-implies' = error "TODO: define implies'"
+implies' a b
+  | not a = True
+  | otherwise = False || b
 
 -- Task Datatypes-3.
 --
@@ -47,7 +51,8 @@ implies' = error "TODO: define implies'"
 -- Just 2
 --
 orelse :: Maybe a -> Maybe a -> Maybe a
-orelse = error "TODO: define orelse"
+orelse Nothing mx = mx
+orelse mx _       = mx
 
 -- Task Datatypes-4.
 --
@@ -58,7 +63,8 @@ orelse = error "TODO: define orelse"
 -- Just 8
 --
 mapMaybe :: (a -> b) -> Maybe a -> Maybe b
-mapMaybe = error "TODO: define mapMaybe"
+mapMaybe _ Nothing  = Nothing
+mapMaybe f (Just x) = (Just (f x))
 
 -- Task Datatypes-5.
 --
@@ -93,7 +99,8 @@ mapMaybe = error "TODO: define mapMaybe"
 -- Nothing
 --
 pairMaybe :: Maybe a -> Maybe b -> Maybe (a, b)
-pairMaybe = error "TODO: define pairMaybe"
+pairMaybe (Just x) (Just y) = (Just (x, y))
+pairMaybe _ _               = Nothing
 
 -- Task Datatypes-8.
 --
@@ -107,14 +114,15 @@ pairMaybe = error "TODO: define pairMaybe"
 -- Nothing
 --
 liftMaybe :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
-liftMaybe = error "TODO: define liftMaybe"
+liftMaybe f (Just x) (Just y) = (Just (f x y))
+liftMaybe _ _ _               = Nothing
 
 -- Task Datatypes-9.
 --
 -- Reimplement 'pairMaybe' using 'liftMaybe'.
 
 pairMaybe' :: Maybe a -> Maybe b -> Maybe (a, b)
-pairMaybe' = error "TODO: define pairMaybe'"
+pairMaybe' x y = liftMaybe (\x' y' -> (x', y')) x y
 
 -- Task Datatypes-10.
 --
@@ -129,7 +137,7 @@ pairMaybe' = error "TODO: define pairMaybe'"
 -- Nothing
 --
 addMaybes :: Maybe Int -> Maybe Int -> Maybe Int
-addMaybes = error "TODO: define addMaybes"
+addMaybes x y = liftMaybe (+) x y
 
 -- Task Datatypes-11.
 --
@@ -147,7 +155,7 @@ addMaybes = error "TODO: define addMaybes"
 -- 'mapMaybe'.
 
 addMaybes' :: Maybe Int -> Maybe Int -> Maybe Int
-addMaybes' = error "TODO: define addMaybes'"
+addMaybes' x y = mapMaybe (uncurry (+)) $ pairMaybe x y
 
 -- Task Datatypes-13.
 --
@@ -157,6 +165,9 @@ addMaybes' = error "TODO: define addMaybes'"
 -- exactly the same on 'Maybe' as 'liftMaybe'; for
 -- example, by replacing 'liftMaybe' by 'liftA2'
 -- in the definition of the 'addMaybe'.
+
+addMaybes'' :: Maybe Int -> Maybe Int -> Maybe Int
+addMaybes'' x y = liftA2 (+) x y
 
 -- Task Datatypes-14.
 --
@@ -169,7 +180,7 @@ addMaybes' = error "TODO: define addMaybes'"
 -- (8,14)
 --
 split :: (a -> b) -> (a -> c) -> a -> (b, c)
-split = error "TODO: define split"
+split f1 f2 x = (f1 x, f2 x)
 
 -- Task Datatypes-15.
 --
@@ -183,7 +194,8 @@ split = error "TODO: define split"
 -- "MongoliaHaskell"
 --
 (++) :: [a] -> [a] -> [a]
-(++) = error "TODO: define (++)"
+(++) [] ys     = ys
+(++) (x:xs) ys = x:(xs ++ ys)
 
 -- Task Datatypes-16.
 --
@@ -199,14 +211,16 @@ split = error "TODO: define split"
 -- True
 --
 or :: [Bool] -> Bool
-or = error "TODO: define or"
+or = any (== True)
 
 -- Task Datatypes-17.
 --
 -- Reimplement the function 'reverse' from the slides.
 
 reverse :: [a] -> [a]
-reverse = error "TODO: define reverse"
+reverse []     = []
+reverse [x]    = [x]
+reverse (x:xs) = reverse xs ++ [x]
 
 -- Task Datatypes-18.
 --
@@ -224,7 +238,8 @@ reverse = error "TODO: define reverse"
 -- "lleksaHMongolia"
 --
 reverseAcc :: [a] -> [a] -> [a]
-reverseAcc = error "TODO: define reverseAcc"
+reverseAcc acc []     = acc
+reverseAcc acc (x:xs) = reverseAcc (x:acc) xs
 
 -- Task Datatypes-19.
 --
@@ -260,7 +275,7 @@ reverse' = reverseAcc []
 -- [2,4,6]
 --
 filter :: (a -> Bool) -> [a] -> [a]
-filter = error "TODO: define filter"
+filter f xs = [x | x <- xs, f x]
 
 -- Task Datatypes-22.
 --
@@ -278,7 +293,7 @@ filter = error "TODO: define filter"
 -- [1,2,3,4,6,8,12,24]
 --
 divisors :: Integral a => a -> [a]
-divisors = error "TODO: define divisors"
+divisors n = filter (\x -> mod n x == 0) [1..n]
 
 -- Task Datatypes-23.
 --
@@ -316,7 +331,7 @@ divisors = error "TODO: define divisors"
 -- True
 --
 isPrime :: Integral a => a -> Bool
-isPrime = error "TODO: define isPrime"
+isPrime n = divisors n == [1, n]
 
 -- Task Datatypes-25.
 --
@@ -338,7 +353,7 @@ isPrime = error "TODO: define isPrime"
 -- True
 --
 thousandPrimes :: [Int]
-thousandPrimes = error "TODO: define thousandPrimes"
+thousandPrimes = take 1000 $ filter isPrime [1..]
 
 -- After computing 'thousandPrimes' in GHCi once, compute
 -- it a second time. What do you observe?
@@ -365,6 +380,10 @@ tree4 = Node tree2 tree3
 -- Task Datatypes-28.
 --
 -- Draw a picture (on paper) of 'tree4'.
+--                | tree4
+--     | tree2              | tree3
+--  2        4          |            1
+--                    2    4
 
 -- Task Datatypes-29.
 --
@@ -375,7 +394,8 @@ tree4 = Node tree2 tree3
 -- [0,1,2,3]
 --
 height :: Tree a -> Int
-height = error "TODO: implement height"
+height (Leaf _)   = 0
+height (Node l r) = max (1 + (height l)) (1 + (height r))
 
 -- Task Datatypes-30.
 --
@@ -390,7 +410,8 @@ height = error "TODO: implement height"
 -- Node (Leaf 3) (Leaf 5)
 --
 mapTree :: (a -> b) -> Tree a -> Tree b
-mapTree = error "TODO: implement mapTree"
+mapTree f (Leaf a)   = Leaf (f a)
+mapTree f (Node l r) = Node (mapTree f l) (mapTree f r)
 
 -- Task Datatypes-31.
 --
@@ -406,7 +427,10 @@ mapTree = error "TODO: implement mapTree"
 -- True
 --
 sameShape :: Tree a -> Tree b -> Bool
-sameShape = error "TODO: implement sameShape'"
+sameShape (Leaf _) (Leaf _)         = True
+sameShape (Leaf _) _                = False
+sameShape _ (Leaf _)                = False
+sameShape (Node l1 r1) (Node l2 r2) = sameShape l1 l2 && sameShape r1 r2
 
 -- Task Datatypes-32.
 --
@@ -425,7 +449,9 @@ sameShape = error "TODO: implement sameShape'"
 --   () :: ()
 
 sameShape' :: Tree a -> Tree b -> Bool
-sameShape' = error "TODO: implement sameShape'"
+sameShape' t1 t2 = unify t1 == unify t2
+  where
+    unify = mapTree (\_ -> ())
 
 -- Task Datatypes-33.
 --
@@ -444,7 +470,9 @@ sameShape' = error "TODO: implement sameShape'"
 -- Node (Node (Leaf ()) (Leaf ())) (Node (Leaf ()) (Leaf ()))
 --
 buildTree :: Int -> Tree ()
-buildTree = error "TODO: implement buildTree"
+buildTree n
+  | (n <= 0) = Leaf ()
+  | otherwise = Node (buildTree (n-1)) (buildTree (n-1))
 
 -- Task Datatypes-34.
 --
@@ -458,13 +486,16 @@ buildTree = error "TODO: implement buildTree"
 -- Node (Leaf 'x') (Node (Leaf 'y') (Leaf 'z'))
 --
 graft :: Tree (Tree a) -> Tree a
-graft = error "TODO: implement graft"
+graft (Leaf t)   = t
+graft (Node l r) = Node (graft l) (graft r)
 
 -- Task Datatypes-35.
 --
 -- Explain in words what the following
 -- function does.
 
+-- Takes a tree of ints, maps each "Int-Leaf" with a "Unit-Tree" having a height of the respective Int
+-- and finally flattens this "Unit-Tree" into a single Tree.
 function :: Tree Int -> Tree ()
 function t = graft (mapTree buildTree t)
 
@@ -487,7 +518,10 @@ expr2 :: Expr
 expr2 = IfZero expr1 (Lit 1) (Lit 0)
 
 eval :: Expr -> Int
-eval = error "TODO: implement eval"
+eval (Lit x)           = x
+eval (Add e1 e2)       = eval e1 + eval e2
+eval (Neg e)           = (-(eval e))
+eval (IfZero e1 e2 e3) = if eval e1 == 0 then eval e2 else eval e3
 
 prop_eval1 :: Bool
 prop_eval1 = eval expr1 == -8
@@ -506,7 +540,7 @@ prop_eval2 = eval expr2 == 0
 -- Add (Lit 42) (Neg (Lit 2))
 --
 sub :: Expr -> Expr -> Expr
-sub = error "TODO: implement sub"
+sub e1 e2 = Add (e1) (Neg (e2))
 
 -- Task Datatypes-38.
 --
@@ -522,7 +556,10 @@ sub = error "TODO: implement sub"
 -- 2
 --
 countOps :: Expr -> Int
-countOps = error "TODO: implement countOps"
+countOps (Lit _)           = 0
+countOps (Add e1 e2)       = 1 + countOps e1 + countOps e2
+countOps (Neg e)           = 1 + countOps e
+countOps (IfZero e1 e2 e3) = 1 + countOps e1 + countOps e2 + countOps e3
 
 -- Task Datatypes-39.
 --
@@ -538,6 +575,12 @@ countOps = error "TODO: implement countOps"
 -- Use as many parentheses as you need or want.
 -- You do not have to try to minimize the number
 -- of parentheses needed.
+
+showExpr :: Expr -> [Char]
+showExpr (Lit x)           = show x ++ " "
+showExpr (Add e1 e2)       = showExpr e1 ++ " + " ++ showExpr e2 ++ " "
+showExpr (Neg e)           = "- " ++ showExpr e ++ " "
+showExpr (IfZero e1 e2 e3) = "ifzero " ++ showExpr e1 ++ "then " ++ showExpr e2 ++ "else " ++ showExpr e3
 
 -- Task Datatypes-40.
 --
